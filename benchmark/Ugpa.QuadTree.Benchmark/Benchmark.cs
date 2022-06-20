@@ -31,21 +31,38 @@ namespace Ugpa.QuadTree.Benchmark
 #endif
                 ;
 
+            var immutableCfg = ImmutableConfigBuilder.Create(cfg);
+
             BenchmarkSwitcher
                 .FromTypes(
                     new[]
                     {
-                        typeof(SimpleBoundComparisonBenchmark),
-                        typeof(QuadTreeBenchmark)
+                        typeof(SimplePointInBoundsBenchmark),
+                        typeof(QuadTreePickInPointBenchmark)
                     })
                 .RunAllJoined(cfg);
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine();
             Console.WriteLine("// Done");
-            Console.WriteLine("// Press Enter to close");
+            Console.WriteLine("// Press Enter to continue");
             Console.ForegroundColor = ConsoleColor.White;
+            Console.ReadLine();
 
+            BenchmarkSwitcher
+                .FromTypes(
+                    new[]
+                    {
+                        typeof(SimpleBoundsIntersectionBenchmark),
+                        typeof(QuadTreePickInBoundsBenchmark)
+                    })
+                .RunAllJoined(cfg);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine();
+            Console.WriteLine("// Done");
+            Console.WriteLine("// Press Enter to continue");
+            Console.ForegroundColor = ConsoleColor.White;
             Console.ReadLine();
         }
     }

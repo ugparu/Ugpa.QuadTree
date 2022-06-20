@@ -13,7 +13,7 @@ namespace Ugpa.QuadTree.Benchmark
 
         private readonly List<Bounds> items = new List<Bounds>();
         private readonly ConcurrentDictionary<int, Point> points = new ConcurrentDictionary<int, Point>();
-        private readonly ConcurrentDictionary<int, Bounds> bounds = new ConcurrentDictionary<int, Bounds>();
+        private readonly ConcurrentDictionary<(int, int), Bounds> bounds = new ConcurrentDictionary<(int, int), Bounds>();
 
         private int left;
         private int top;
@@ -31,14 +31,14 @@ namespace Ugpa.QuadTree.Benchmark
                 _ => new Point { X = rnd.Next(left, right + 1), Y = rnd.Next(bottom, top + 1) });
         }
 
-        public Bounds GetBounds(int index)
+        public Bounds GetBounds(int areaMaxSize, int index)
         {
             return bounds.GetOrAdd(
-                index,
+                (areaMaxSize, index),
                 _ =>
                 {
-                    var width = rnd.Next(16, 256);
-                    var height = rnd.Next(16, 256);
+                    var width = rnd.Next(16, areaMaxSize);
+                    var height = rnd.Next(16, areaMaxSize);
                     var left = rnd.Next(right - width);
                     var bottom = rnd.Next(top - height);
                     return new Bounds { Left = left, Top = bottom + height, Right = left + width, Bottom = bottom };
