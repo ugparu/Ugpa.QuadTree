@@ -1,0 +1,7 @@
+/.vs
+/benchmark/Ugpa.QuadTree.Benchmark/bin
+/benchmark/Ugpa.QuadTree.Benchmark/obj
+/src/Ugpa.QuadTree/bin
+/src/Ugpa.QuadTree/obj
+/tests/Ugpa.QuadTree.Tests/bin
+/tests/Ugpa.QuadTree.Tests/obj
