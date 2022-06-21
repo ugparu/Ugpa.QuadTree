@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BenchmarkDotNet.Attributes;
 
 namespace Ugpa.QuadTree.Benchmark
 {
@@ -8,7 +7,6 @@ namespace Ugpa.QuadTree.Benchmark
     {
         private BenchmarkData.Point hitTestPoint;
 
-        [Benchmark]
         public object PointHitTest()
             => PointHitTest(hitTestPoint.X, hitTestPoint.Y).ToArray();
 

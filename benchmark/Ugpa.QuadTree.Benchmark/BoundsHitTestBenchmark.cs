@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BenchmarkDotNet.Attributes;
 
 namespace Ugpa.QuadTree.Benchmark
 {
@@ -8,12 +7,8 @@ namespace Ugpa.QuadTree.Benchmark
     {
         private BenchmarkData.Bounds hitTestBounds;
 
-        [ParamsSource(nameof(AreaMaxSizes))]
         public int AreaMaxSize { get; set; }
 
-        public int[] AreaMaxSizes => QuadTreeBenchmarkParams.AreaMaxSizes;
-
-        [Benchmark]
         public object BoundsHitTest()
             => BoundsHitTest(hitTestBounds.Left, hitTestBounds.Top, hitTestBounds.Right, hitTestBounds.Bottom).ToArray();
 

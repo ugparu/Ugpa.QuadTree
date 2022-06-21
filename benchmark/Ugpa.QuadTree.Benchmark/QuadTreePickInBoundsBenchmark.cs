@@ -8,15 +8,9 @@ namespace Ugpa.QuadTree.Benchmark
     {
         private QuadTree<BenchmarkData.Bounds> tree;
 
-        [ParamsSource(nameof(MaxDepths))]
         public int MaxDepth { get; set; }
 
-        [ParamsSource(nameof(NodeSizes))]
         public int NodeSize { get; set; }
-
-        public int[] MaxDepths => QuadTreeBenchmarkParams.MaxDepths;
-
-        public int[] NodeSizes => QuadTreeBenchmarkParams.NodeSizes;
 
         public override void GlobalSetup()
         {

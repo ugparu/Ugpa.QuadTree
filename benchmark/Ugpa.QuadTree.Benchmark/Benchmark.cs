@@ -4,6 +4,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
+using Ugpa.QuadTree.Benchmark.Configuration;
 
 namespace Ugpa.QuadTree.Benchmark
 {
@@ -11,14 +12,16 @@ namespace Ugpa.QuadTree.Benchmark
     {
         public static void Main()
         {
+            var maxDepths = new[] { 1, 2, 3, 4, 5 };
+            var nodeSizes = new[] { 256, 512, 1024 };
+            var areaMaxSizes = new[] { 128, 512, 2048 };
+
+            var pointHitTestJob = CreateJob();
+            var boundsHitTestJob = CreateJob();
+
             var cfg = ManualConfig
                 .CreateEmpty()
-                .AddJob(Job.Default
-#if DEBUG
-                    .WithStrategy(BenchmarkDotNet.Engines.RunStrategy.ColdStart)
-                    .WithToolchain(new BenchmarkDotNet.Toolchains.InProcess.Emit.InProcessEmitToolchain(TimeSpan.FromHours(1.0), logOutput: true))
-#endif
-                    )
+                .AddJob(pointHitTestJob, boundsHitTestJob)
                 .AddColumnProvider(
                     DefaultColumnProviders.Descriptor,
                     DefaultColumnProviders.Job,
@@ -33,14 +36,23 @@ namespace Ugpa.QuadTree.Benchmark
 
             var immutableCfg = ImmutableConfigBuilder.Create(cfg);
 
-            BenchmarkSwitcher
-                .FromTypes(
-                    new[]
-                    {
-                        typeof(SimplePointInBoundsBenchmark),
-                        typeof(QuadTreePickInPointBenchmark)
-                    })
-                .RunAllJoined(cfg);
+            BenchmarkRunner.Run(BenchmarkRunInfoBuilder
+                .Create()
+                .AddCase<SimplePointInBoundsBenchmark>(
+                    pointHitTestJob,
+                    caseCfg => caseCfg
+                        .WithWorkload(_ => _.PointHitTest())
+                        .WithGlobalSetup(_ => _.GlobalSetup())
+                        .WithIterationSetup(_ => _.IterationSetup()))
+                .AddCases<QuadTreePickInPointBenchmark>(
+                    pointHitTestJob,
+                    caseCfg => caseCfg
+                        .WithWorkload(_ => _.PointHitTest())
+                        .WithGlobalSetup(_ => _.GlobalSetup())
+                        .WithIterationSetup(_ => _.IterationSetup())
+                        .WithParameterValues(_ => _.MaxDepth, maxDepths)
+                        .WithParameterValues(_ => _.NodeSize, nodeSizes))
+                .Build(immutableCfg));
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine();
@@ -49,14 +61,25 @@ namespace Ugpa.QuadTree.Benchmark
             Console.ForegroundColor = ConsoleColor.White;
             Console.ReadLine();
 
-            BenchmarkSwitcher
-                .FromTypes(
-                    new[]
-                    {
-                        typeof(SimpleBoundsIntersectionBenchmark),
-                        typeof(QuadTreePickInBoundsBenchmark)
-                    })
-                .RunAllJoined(cfg);
+            BenchmarkRunner.Run(BenchmarkRunInfoBuilder
+                .Create()
+                .AddCases<SimpleBoundsIntersectionBenchmark>(
+                    boundsHitTestJob,
+                    caseCfg => caseCfg
+                        .WithWorkload(_ => _.BoundsHitTest())
+                        .WithGlobalSetup(_ => _.GlobalSetup())
+                        .WithIterationSetup(_ => _.IterationSetup())
+                        .WithParameterValues(_ => _.AreaMaxSize, areaMaxSizes))
+                .AddCases<QuadTreePickInBoundsBenchmark>(
+                    boundsHitTestJob,
+                    caseCfg => caseCfg
+                        .WithWorkload(_ => _.BoundsHitTest())
+                        .WithGlobalSetup(_ => _.GlobalSetup())
+                        .WithIterationSetup(_ => _.IterationSetup())
+                        .WithParameterValues(_ => _.MaxDepth, maxDepths)
+                        .WithParameterValues(_ => _.NodeSize, nodeSizes)
+                        .WithParameterValues(_ => _.AreaMaxSize, areaMaxSizes))
+                .Build(immutableCfg));
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine();
@@ -64,6 +87,16 @@ namespace Ugpa.QuadTree.Benchmark
             Console.WriteLine("// Press Enter to continue");
             Console.ForegroundColor = ConsoleColor.White;
             Console.ReadLine();
+        }
+
+        private static Job CreateJob()
+        {
+            return Job.Default
+#if DEBUG
+                .WithStrategy(BenchmarkDotNet.Engines.RunStrategy.ColdStart)
+                .WithToolchain(new BenchmarkDotNet.Toolchains.InProcess.Emit.InProcessEmitToolchain(TimeSpan.FromHours(1.0), logOutput: true))
+#endif
+                ;
         }
     }
 }
